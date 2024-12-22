@@ -4,35 +4,35 @@ afficher_aide() {
     cat << FIN
 Utilisation : $0 <chemin> <station> <consommation>
 Description :
-Ce script vérifie la validité des arguments fournis et effectue des opérations spécifiques.
+Ce script vÃ©rifie la validitÃ© des arguments fournis et effectue des opÃ©rations spÃ©cifiques.
 
 Arguments requis :
   <chemin>        Chemin absolu valide vers un fichier.
-  <station>       Doit être l'un des suivants : "hvb", "hva", "lv".
-  <consommation>  Doit être l'un des suivants : "entreprise", "individuel", "tout".
+  <station>       Doit Ãªtre l'un des suivants : "hvb", "hva", "lv".
+  <consommation>  Doit Ãªtre l'un des suivants : "entreprise", "individuel", "tout".
 
 Combinaisons invalides de <station> et <consommation> :
   - hvb-individuel
   - hvb-tout
   - hva-individuel
   - hva-tout
-Si une combinaison invalide est fournie, une erreur sera affichée.
+Si une combinaison invalide est fournie, une erreur sera affichÃ©e.
 
 Options :
   -h, --aide      Affiche cette aide et quitte.
 FIN
 }
 
-# Début du chronomètre
+# DÃ©but du chronomÃ¨tre
 debut_script=$(date +%s)
 
-# Gérer l'option d'aide
+# GÃ©rer l'option d'aide
 if [[ "$1" == "-h" || "$1" == "--aide" ]]; then
     afficher_aide
     exit 0
 fi
 
-# Vérifier le nombre d'arguments
+# VÃ©rifier le nombre d'arguments
 if [[ $# -ne 3 ]]; then
     echo "Erreur : Nombre d'arguments incorrect."
     afficher_aide
@@ -44,48 +44,48 @@ chemin_fichier=$1
 type_station=$2
 type_consommation=$3
 
-# Vérifier la validité du chemin
+# VÃ©rifier la validitÃ© du chemin
 if [[ ! -f "$chemin_fichier" ]]; then
-    echo "Erreur : Fichier introuvable à l'emplacement $chemin_fichier."
+    echo "Erreur : Fichier introuvable Ã  l'emplacement $chemin_fichier."
     afficher_aide
     exit 2
 fi
 
-# Vérifier le type de station
+# VÃ©rifier le type de station
 if [[ "$type_station" != "hvb" && "$type_station" != "hva" && "$type_station" != "lv" ]]; then
     echo "Erreur : Type de station invalide : $type_station."
     afficher_aide
     exit 3
 fi
 
-# Vérifier le type de consommation
+# VÃ©rifier le type de consommation
 if [[ "$type_consommation" != "entreprise" && "$type_consommation" != "individuel" && "$type_consommation" != "tout" ]]; then
     echo "Erreur : Type de consommation invalide : $type_consommation."
     afficher_aide
     exit 4
 fi
 
-# Vérifier et compiler l'exécutable si nécessaire
-executable="codeC/MNH_CWire"
+# VÃ©rifier et compiler l'exÃ©cutable si nÃ©cessaire
+executable="codeC/CY_CWire"
 if [[ ! -f "$executable" ]]; then
-    echo "Compilation de l'exécutable manquant..."
+    echo "Compilation de l'exÃ©cutable manquant..."
     (cd codeC && make clean && make all)
     if [[ ! -f "$executable" ]]; then
-        echo "Erreur : La compilation a échoué pour $executable."
+        echo "Erreur : La compilation a Ã©chouÃ© pour $executable."
         exit 5
     fi
 fi
 
-# Préparer le répertoire temporaire
+# PrÃ©parer le rÃ©pertoire temporaire
 dossier_tmp="tmp"
 if [[ ! -d "$dossier_tmp" ]]; then
-    echo "Création du répertoire temporaire $dossier_tmp..."
+    echo "CrÃ©ation du rÃ©pertoire temporaire $dossier_tmp..."
     mkdir "$dossier_tmp"
 else
     rm -rf "$dossier_tmp/*"
 fi
 
-# Gérer les combinaisons station-consommation
+# GÃ©rer les combinaisons station-consommation
 case "${type_station}-${type_consommation}" in
     "hvb-entreprise")
         awk -F";" '($2 != "-" && $5 != "-") || ($2 != "-" && $7 != "-") {print $2 ";" $7 ";" $8}' input/c-wire_v25.dat > "$dossier_tmp/hvb_entreprise.csv"
@@ -118,7 +118,7 @@ case "${type_station}-${type_consommation}" in
         fichier_final="tests/lv_tout_minmax.csv"
 
         if [[ -s "$fichier_tmp" ]]; then
-            echo "Nom;Capacité;Consommation;Différence" > "$fichier_final"
+            echo "Nom;CapacitÃ©;Consommation;DiffÃ©rence" > "$fichier_final"
             awk -F";" 'NR > 1 && $2 ~ /^[0-9]+$/ && $3 ~ /^[0-9]+$/ {
                 capacite = $2; consommation = $3; difference = capacite - consommation;
                 print $0 ";" difference;
@@ -127,7 +127,7 @@ case "${type_station}-${type_consommation}" in
                 tail -n 10 >> "$fichier_final"
             }
         else
-            echo "Erreur : Aucune donnée valide pour lv-tout."
+            echo "Erreur : Aucune donnÃ©e valide pour lv-tout."
             exit 7
         fi
         ;;
@@ -138,14 +138,14 @@ case "${type_station}-${type_consommation}" in
         ;;
 esac
 
-# Vérifier ou créer le fichier final
+# VÃ©rifier ou crÃ©er le fichier final
 [[ ! -f "$fichier_final" ]] && touch "$fichier_final" && chmod +w "$fichier_final"
 
-# Exécuter l'exécutable
+# ExÃ©cuter l'exÃ©cutable
 "$executable" "$fichier_tmp" "$fichier_final" > /dev/null
 sort -t ';' -k 2,2 "$fichier_final" > /dev/null
 
-# Fin du chronomètre et affichage du temps écoulé
+# Fin du chronomÃ¨tre et affichage du temps Ã©coulÃ©
 fin_script=$(date +%s)
 temps_ecoule=$((fin_script - debut_script))
-echo "Temps total d'exécution : $temps_ecoule secondes"
+echo "Temps total d'exÃ©cution : $temps_ecoule secondes"
