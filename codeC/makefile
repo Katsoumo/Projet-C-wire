@@ -1,5 +1,5 @@
 # Nom de l'exécutable
-EXEC = MNH_CWire
+EXEC = CY_CWire
 
 # Répertoires des fichiers .c et .h
 SRC_DIR = .
