@@ -17,11 +17,11 @@ int main(int argc, char *argv[]) {
     PAVL arbre = NULL;
     int hauteur = 0;
 
-    TraiterFichier(nom_fichier, &arbre, &hauteur);
+    traiterFichier(nom_fichier, &arbre, &hauteur);
 
     FILE *fichier = fopen(fichier_final, "w");
     if (fichier == NULL) {
-        printf("Impossible d'ouvrir le fichier %s en écriture.\n", fichier_final);
+        printf("Impossible d'ouvrir le fichier %s en Ã©criture.\n", fichier_final);
         exit(1);
     }
 
